@@ -12,7 +12,6 @@ class Release(db.Model):
     title = db.Column(db.Text)
     date_released = db.Column(db.Date)
     genre = db.Column(db.String)
-    priority = db.Column(db.String)
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
