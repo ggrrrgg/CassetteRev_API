@@ -16,7 +16,7 @@ class Release(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     user = db.relationship('User', back_populates='releases')
-    comments = db.relationship('Comment', back_populates='release', cascade='all, delete')
+    # comments = db.relationship('Comment', back_populates='release', cascade='all, delete')
 
 class ReleaseSchema(ma.Schema):
     pass

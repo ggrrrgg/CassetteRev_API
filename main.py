@@ -2,8 +2,8 @@ from flask import Flask
 import os
 from init import db, ma, bcrypt, jwt
 from controllers.cli_controller import db_commands
-from controllers.auth_controller import auth_bp
-from controllers.card_controller import cards_bp
+# from controllers.auth_controller import auth_bp
+# from controllers.card_controller import cards_bp
 from marshmallow.exceptions import ValidationError
 
 def create_app():
@@ -33,7 +33,7 @@ def create_app():
     jwt.init_app(app)
 
     app.register_blueprint(db_commands)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(cards_bp)
+    # app.register_blueprint(auth_bp)
+    # app.register_blueprint(cards_bp)
 
     return app

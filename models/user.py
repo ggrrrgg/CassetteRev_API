@@ -11,11 +11,14 @@ class User(db.Model):
     date = db.Column(db.Date)
     is_admin = db.Column(db.Boolean, default=False)
 
+    releases = db.relationship('Release', back_populates='user', cascade='all, delete')
+
 class UserSchema(ma.Schema):
+    releases = fields.List(fields.Nested('ReleaseSchema', exclude=['user']))
 
 
     class Meta:
-        fields = ('id', 'username', 'email', 'password', 'is_admin', 'date', 'release', 'comments')
+        fields = ('id', 'username', 'email', 'password', 'is_admin', 'date', 'releases', 'comments')
 
 user_schema = UserSchema(exclude=['password'])
 users_schema = UserSchema(many=True, exclude=['password'])

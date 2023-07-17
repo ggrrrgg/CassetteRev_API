@@ -51,7 +51,7 @@ def seed_db():
         )
     ]
 
-    db.session.add_all(cards)
+    db.session.add_all(releases)
 
     # comments = [
     #     Comment(
@@ -78,7 +78,7 @@ def seed_db():
 
     # db.session.add_all(comments)
 
-    # db.session.commit()
+    db.session.commit()
 
 
     print("Tables seeded")
