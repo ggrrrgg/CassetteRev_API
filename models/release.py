@@ -19,4 +19,4 @@ class Release(db.Model):
     # comments = db.relationship('Comment', back_populates='release', cascade='all, delete')
 
 class ReleaseSchema(ma.Schema):
-    pass
+    user = fields.Nested('ReleaseSchema', only=['username', 'email'])
