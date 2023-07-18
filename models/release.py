@@ -5,7 +5,7 @@ from marshmallow.exceptions import ValidationError
 
 
 class Release(db.Model):
-    __tablename__ = "releases"
+    __tablename__ = 'releases'
 
     id = db.Column(db.Integer, primary_key=True)
     artist = db.Column(db.String)
@@ -16,6 +16,7 @@ class Release(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     user = db.relationship('User', back_populates='releases')
+    reviews = db.relationship('Review', back_populates='releases')
     # comments = db.relationship('Comment', back_populates='release', cascade='all, delete')
 
 class ReleaseSchema(ma.Schema):

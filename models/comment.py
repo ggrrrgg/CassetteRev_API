@@ -9,10 +9,10 @@ class Comment(db.Model):
     comment_txt = db.Column(db.Text)
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    review_id = db.Column(db.Integer, db.ForeignKey('review.id'), nullable=False)
+    review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
 
     user = db.relationship('User', back_populates='comments')
-    review = db.relationship('Review', back_populates='comments')
+    reviews = db.relationship('Review', back_populates='comments')
 
 class CommentSchema(ma.Schema):
     user = fields.Nested('UserSchema', only=['username', 'email'])

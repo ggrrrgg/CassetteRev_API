@@ -2,7 +2,8 @@ from flask import Blueprint
 from init import db, bcrypt
 from models.user import User
 from models.release import Release
-# from models.comment import Comment
+from models.review import Review
+from models.comment import Comment
 from datetime import date
 
 db_commands = Blueprint('db', __name__)
@@ -53,31 +54,40 @@ def seed_db():
 
     db.session.add_all(releases)
 
-    # comments = [
-    #     Comment(
-    #         message="Comment 1",
-    #         user=users[0],
-    #         card=cards[0]
-    #     ),
-    #     Comment(
-    #         message="Comment 2",
-    #         user=users[1],
-    #         card=cards[2]
-    #     ),
-    #     Comment(
-    #         message="Comment 3",
-    #         user=users[1],
-    #         card=cards[3]
-    #     ),
-    #     Comment(
-    #         message="Comment 4",
-    #         user=users[0],
-    #         card=cards[3]
-    #     )
-    # ]
+    reviews = [
+        Review(
+            rating='9',
+            review_txt='Wow',
+            user=users[1],
+            releases=releases[0]
 
-    # db.session.add_all(comments)
+        ),
+        Review(
+            rating='7',
+            review_txt='Yeah, I reckon',
+            user=users[0],
+            releases=releases[1]
+        )
+    ]
 
+    db.session.add_all(reviews)
+
+    comments = [
+        Comment(
+            comment_txt="U old",
+            user=users[1],
+            reviews=reviews[1]
+        ),
+        Comment(
+            comment_txt="Cringgggeeee",
+            user=users[1],
+            reviews=reviews[1]
+        )
+    ]
+
+    
+    
+    db.session.add_all(comments)
     db.session.commit()
 
 
