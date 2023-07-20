@@ -17,7 +17,14 @@ class Release(db.Model):
 
     user = db.relationship('User', back_populates='releases')
     reviews = db.relationship('Review', back_populates='releases')
-    # comments = db.relationship('Comment', back_populates='release', cascade='all, delete')
+
 
 class ReleaseSchema(ma.Schema):
     user = fields.Nested('ReleaseSchema', only=['username', 'email'])
+
+    class Meta:
+        fields = ('id', 'artist', 'title', 'date_released', 'genre')
+        ordered = True
+
+release_schema = ReleaseSchema()
+releases_schema = ReleaseSchema(many=True)
