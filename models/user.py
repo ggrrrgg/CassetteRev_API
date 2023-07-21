@@ -1,6 +1,6 @@
 from init import db, ma
 from marshmallow import fields
-from datetime import timedelta
+# from datetime import timedelta
 
 class User(db.Model):
     __tablename__ = 'users'
