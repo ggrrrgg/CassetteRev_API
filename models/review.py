@@ -21,7 +21,7 @@ class ReviewSchema(ma.Schema):
     releases = fields.Nested('ReleaseSchema', exclude=['reviews'])
 
     class Meta:
-        fields = ('id', 'rating', 'release', 'username')
+        fields = ('id', 'rating', 'review_txt', 'release', 'username')
         ordered = True
 
 review_schema = ReviewSchema()

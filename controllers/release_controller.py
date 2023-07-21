@@ -2,11 +2,13 @@ from flask import Blueprint, request
 from init import db
 from models.user import User
 from models.release import Release, release_schema, releases_schema
+from controllers.review_controller import review_bp
 from datetime import date
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 releases_bp = Blueprint('releases', __name__, url_prefix='/releases')
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+releases_bp.register_blueprint(review_bp, url_prefix='/<int:release_id>/review')
+# auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @releases_bp.route('/', methods=['GET'])
 def get_all_releases():

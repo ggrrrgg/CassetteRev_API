@@ -35,5 +35,7 @@ def create_app():
     app.register_blueprint(db_commands)
     app.register_blueprint(auth_bp)
     app.register_blueprint(releases_bp)
+    
+    
 
     return app
