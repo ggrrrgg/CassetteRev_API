@@ -7,7 +7,7 @@ from datetime import date
 
 releases_bp = Blueprint('releases', __name__, url_prefix='/releases')
 
-@releases_bp.route('/', methods=["GET"])
+@releases_bp.route('/', methods=['GET'])
 def get_all_releases():
     stmt = db.select(Release)
     releases = db.session.scalars(stmt)
