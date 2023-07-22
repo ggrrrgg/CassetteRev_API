@@ -16,14 +16,15 @@ class Release(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     user = db.relationship('User', back_populates='releases')
-    reviews = db.relationship('Review', back_populates='releases')
+    reviews = db.relationship('Review', back_populates='releases', cascade='all, delete')
 
 
 class ReleaseSchema(ma.Schema):
     user = fields.Nested('ReleaseSchema', only=['username', 'email'])
+    reviews = fields.Nested('ReviewSchema', only=['username', 'rating', 'review_txt'] )
 
     class Meta:
-        fields = ('id', 'artist', 'title', 'date_released', 'genre')
+        fields = ('id', 'artist', 'title', 'date_released', 'genre', 'reviews')
         ordered = True
 
 release_schema = ReleaseSchema()

@@ -26,4 +26,40 @@ def get_one_release(id):
     else:
         return {'error': f'Release not found with id {id}'}, 404
     
+@releases_bp.route('/<int:id>', methods=['DELETE'])
+@jwt_required()
+# @authorise_as_admin
+def delete_one_release(id):
+    # is_admin = authorise_as_admin()
+    # if not is_admin:
+    #     return {'error': 'Not authorised to delete cards'}, 403
+    stmt = db.select(Release).filter_by(id=id)
+    release = db.session.scalar(stmt)
+    if release:
+        db.session.delete(release)
+        db.session.commit()
+        return {'message': f'{release.title} deleted successfully'}
+    else:
+        return {'error': f'Release not found with id {id}'}, 404
+
+@releases_bp.route('/<int:id>', methods=['PUT', 'PATCH'])
+@jwt_required()
+def update_one_release(id):
+    body_data = release_schema.load(request.get_json(), partial=True)
+    stmt = db.select(Release).filter_by(id=id)
+    release = db.session.scalar(stmt)
+    user = db.session.scalar(stmt)
+    if release:
+        if str(release.user_id) != get_jwt_identity():
+            return {'error': f'Only {user.username} can edit this release'}, 403
+        release.artist = body_data.get('artist') or release.artist
+        release.title = body_data.get('title') or release.title
+        release.date_released = body_data.get('date_released') or release.date_released
+        release.genre = body_data.get('genre') or release.genre
+        
+        db.session.commit()
+        return release_schema.dump(release)
+    else:
+        return {'error': f'Release not found with id {id}'}, 404
+    
 
