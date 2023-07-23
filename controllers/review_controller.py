@@ -19,7 +19,7 @@ def create_review(release_id):
             rating=body_data.get('rating'),
             review_txt=body_data.get('review_txt'),
             user_id=get_jwt_identity(), # pass id to the _id field
-            release_id=release_id # pass the model instance to the model field
+            releases=release # pass the model instance to the model field
         )
 
         db.session.add(review)

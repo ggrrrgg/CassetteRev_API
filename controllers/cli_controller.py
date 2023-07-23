@@ -22,6 +22,7 @@ def drop_db():
 def seed_db():
     users = [
         User(
+            username='Admin',
             email='admin@admin.com',
             password=bcrypt.generate_password_hash('admin123').decode('utf-8'),
             is_admin=True
