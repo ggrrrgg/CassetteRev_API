@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from init import db
-# from models.user import User, user_schema
+from models.user import User, user_schema
 from models.review import review_schema
 from models.comment import comment_schema
 from models.release import Release, release_schema, releases_schema
@@ -8,10 +8,23 @@ from controllers.review_controller import review_bp
 from controllers.comment_controller import comment_bp
 from datetime import date
 from flask_jwt_extended import get_jwt_identity, jwt_required
+import functools
 
 releases_bp = Blueprint('releases', __name__, url_prefix='/releases')
 releases_bp.register_blueprint(review_bp, url_prefix='/<int:release_id>/review')
 releases_bp.register_blueprint(comment_bp, url_prefix='/<int:release_id>/<int:review_id>/comment')
+
+
+def current_user_is_admin():
+    # Assuming you have implemented the 'User' model, and you have access to the current user object.
+    # If not, you need to retrieve the current user from your authentication system.
+    current_user = User.query.get(get_jwt_identity())
+    if current_user and current_user.is_admin:
+        return True
+    return False
+            
+        
+
 
 @releases_bp.route('/', methods=['GET'])
 def get_all_releases():
@@ -66,19 +79,41 @@ def get_one_release(id):
     
 @releases_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
-# @authorise_as_admin
 def delete_one_release(id):
-    # is_admin = authorise_as_admin()
-    # if not is_admin:
-    #     return {'error': 'Not authorised to delete cards'}, 403
-    stmt = db.select(Release).filter_by(id=id)
-    release = db.session.scalar(stmt)
-    if release:
+    # Get the current user's ID from the JWT token
+    current_user_id = get_jwt_identity()
+
+    # Fetch the release from the database based on the provided 'id'
+    release = db.session.query(Release).get(id)
+
+    if current_user_is_admin():
+        # Admins are granted permission to delete any release
         db.session.delete(release)
         db.session.commit()
         return {'message': f'{release.title} deleted successfully'}
+
+    # If the user is not an admin, check if they are the owner of the release
+    if str(release.user_id) != get_jwt_identity():
+        return {'error': 'You are not authorised to delete this release'}, 403
     else:
-        return {'error': f'Release not found with id {id}'}, 404
+        db.session.delete(release)
+        db.session.commit()
+        return {'message': f'{release.title} deleted successfully'}
+# def delete_one_release(id):
+#     is_admin = authorise_as_admin()
+#     if is_admin:
+#         pass
+    
+    if str(release.user_id) != get_jwt_identity():
+        return {'error': 'You are not authorised to delete this release'}, 403
+#     stmt = db.select(Release).filter_by(id=id)
+#     release = db.session.scalar(stmt)
+#     if release:
+#         db.session.delete(release)
+#         db.session.commit()
+#         return {'message': f'{release.title} deleted successfully'}
+#     else:
+#         return {'error': f'Release not found with id {id}'}, 404
 
 @releases_bp.route('/<int:id>', methods=['PUT', 'PATCH'])
 @jwt_required()
