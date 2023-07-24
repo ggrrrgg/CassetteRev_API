@@ -28,22 +28,36 @@ def create_review(release_id):
     else:
         return {'error': f'Release not found with id {release_id}'}, 404
 
-# @auth_bp.route('/review', methods=['POST'])
-# @jwt_required()
-# def create_review():
-#     body_data = review_schema.load(request.get_json())
-#     # create a new Card model instance
-#     review = Review(
-#         rating=body_data.get('rating'),
-#         review_txt=body_data.get('review_txt'),
-#         date=date.today(),
-#         user_id=get_jwt_identity,
-#         release_id=body_data.get('release_id')
-#     )
-#     # Add that card to the session
-#     db.session.add(review)
-#     # Commit
-#     db.session.commit()
-#     # Respond to the client
-#     return review_schema.dump(review), 201
+@review_bp.route('/<int:review_id>', methods=['DELETE'])
+@jwt_required()
+# @authorise_as_admin
+def delete_one_review(release_id, review_id):
+    # is_admin = authorise_as_admin()
+    # if not is_admin:
+    #     return {'error': 'Not authorised to delete cards'}, 403
+    stmt = db.select(Review).filter_by(id=review_id)
+    review = db.session.scalar(stmt)
+    if review:
+        db.session.delete(review)
+        db.session.commit()
+        return {'message': f'Review {release_id, review_id} deleted successfully'}
+    else:
+        return {'error': f'Review not found'}, 404
+
+@review_bp.route('/<int:review_id>', methods=['PUT', 'PATCH'])
+@jwt_required()
+def update_one_review(release_id, review_id):
+    body_data = review_schema.load(request.get_json(), partial=True)
+    stmt = db.select(Review).filter_by(id=review_id)
+    review = db.session.scalar(stmt)
+    if review:
+        if str(review.user_id) != get_jwt_identity():
+            return {'error': f'Only {user.username} can edit this release'}, 403
+        review.rating = body_data.get('rating') or review.rating
+        review.review_txt = body_data.get('review_txt') or review.review_txt
+        
+        db.session.commit()
+        return review_schema.dump(review)
+    else:
+        return {'error': f'Review {release_id, review_id} not found'}, 404
 
