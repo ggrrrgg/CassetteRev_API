@@ -28,27 +28,27 @@ def create_comment(release_id, review_id):
     else:
         return {'error': f'Review not found with id {release_id, review_id}'}, 404
 
-# @comment_bp.route('/<int:comment_id>', methods=['DELETE'])
-# @jwt_required()
-# def delete_comment(card_id, comment_id):
-#     stmt = db.select(Comment).filter_by(id=comment_id)
-#     comment = db.session.scalar(stmt)
-#     if comment:
-#         db.session.delete(comment)
-#         db.session.commit()
-#         return {'message': f'Comment {comment.message} deleted successfully'}
-#     else:
-#         return {'error': f'Comment not found with id {comment_id}'}, 404
+@comment_bp.route('/<int:comment_id>', methods=['DELETE'])
+@jwt_required()
+def delete_comment(release_id, review_id, comment_id):
+    stmt = db.select(Comment).filter_by(id=comment_id)
+    comment = db.session.scalar(stmt)
+    if comment:
+        db.session.delete(comment)
+        db.session.commit()
+        return {'message': f'Comment {release_id, review_id, comment_id} deleted successfully'}
+    else:
+        return {'error': f'Comment not found with id {release_id, review_id, comment_id}'}, 404
     
-# @comments_bp.route('/<int:comment_id>', methods=['PUT', 'PATCH'])
-# @jwt_required()
-# def update_comment(card_id, comment_id):
-#     body_data = request.get_json()
-#     stmt = db.select(Comment).filter_by(id=comment_id)
-#     comment = db.session.scalar(stmt) # comment from database that needs to be updated
-#     if comment:
-#         comment.message = body_data.get('message') or comment.message
-#         db.session.commit()
-#         return comment_schema.dump(comment)
-#     else:
-#         return {'error': f'Comment not found with id {comment_id}'}, 404
+@comment_bp.route('/<int:comment_id>', methods=['PUT', 'PATCH'])
+@jwt_required()
+def update_comment(release_id, review_id, comment_id):
+    body_data = request.get_json()
+    stmt = db.select(Comment).filter_by(id=comment_id)
+    comment = db.session.scalar(stmt) # comment from database that needs to be updated
+    if comment:
+        comment.comment_txt = body_data.get('comment_txt') or comment.comment_txt
+        db.session.commit()
+        return comment_schema.dump(comment)
+    else:
+        return {'error': f'Comment {release_id, review_id, comment_id} not found'}, 404
