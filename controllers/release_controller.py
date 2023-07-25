@@ -80,8 +80,6 @@ def get_one_release(id):
 @releases_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_one_release(id):
-    # Get the current user's ID from the JWT token
-    current_user_id = get_jwt_identity()
 
     # Fetch the release from the database based on the provided 'id'
     release = db.session.query(Release).get(id)
@@ -99,21 +97,7 @@ def delete_one_release(id):
         db.session.delete(release)
         db.session.commit()
         return {'message': f'{release.title} deleted successfully'}
-# def delete_one_release(id):
-#     is_admin = authorise_as_admin()
-#     if is_admin:
-#         pass
-    
-    if str(release.user_id) != get_jwt_identity():
-        return {'error': 'You are not authorised to delete this release'}, 403
-#     stmt = db.select(Release).filter_by(id=id)
-#     release = db.session.scalar(stmt)
-#     if release:
-#         db.session.delete(release)
-#         db.session.commit()
-#         return {'message': f'{release.title} deleted successfully'}
-#     else:
-#         return {'error': f'Release not found with id {id}'}, 404
+
 
 @releases_bp.route('/<int:id>', methods=['PUT', 'PATCH'])
 @jwt_required()

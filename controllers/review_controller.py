@@ -30,11 +30,8 @@ def create_review(release_id):
 
 @review_bp.route('/<int:review_id>', methods=['DELETE'])
 @jwt_required()
-# @authorise_as_admin
 def delete_one_review(release_id, review_id):
-    # is_admin = authorise_as_admin()
-    # if not is_admin:
-    #     return {'error': 'Not authorised to delete cards'}, 403
+    
     stmt = db.select(Review).filter_by(id=review_id)
     review = db.session.scalar(stmt)
     if review:
