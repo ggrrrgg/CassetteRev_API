@@ -81,6 +81,29 @@ def delete_user(id):
         db.session.delete(user)
         db.session.commit()
         return {'message': f'{user.username} deleted successfully'}
+    
+@auth_bp.route('/edit/<int:id>', methods=['PUT', 'PATCH'])
+@jwt_required()
+def update_user(id):
+    body_data = user_schema.load(request.get_json(), partial=True)
+    stmt = db.select(User).filter_by(id=id)
+    user = db.session.scalar(stmt)
+    if current_user_is_admin():
+        # Admins are granted permission to delete any release
+        user.username = body_data.get('username') or user.username
+        user.password = body_data.get('password') or user.password
+        user.is_admin = body_data.get('is_admin') or user.is_admin
+        return {'message': f'{user.username} updated successfully'}
+    if user:
+        if str(user.user_id) != get_jwt_identity():
+            return {'error': f'Only {user.username} can edit themselves'}, 403
+        user.username = body_data.get('username') or user.username
+        user.password = body_data.get('password') or user.password
+        
+        db.session.commit()
+        return user_schema.dump(user)
+    else:
+        return {'error': f'User {id} not found'}, 404
 
 
 
