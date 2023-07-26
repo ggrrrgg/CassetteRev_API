@@ -17,9 +17,9 @@ class User(db.Model):
     comments = db.relationship('Comment', back_populates='user', cascade='all, delete')
 
 class UserSchema(ma.Schema):
-    releases = fields.List(fields.Nested('ReleaseSchema', exclude=['user']))
-    reviews = fields.List(fields.Nested('ReviewSchema', exclude=['user']))
-    comments = fields.List(fields.Nested('CommentSchema', exclude=['user']))
+    releases = fields.List(fields.Nested('ReleaseSchema'))
+    reviews = fields.List(fields.Nested('ReviewSchema'))
+    comments = fields.List(fields.Nested('CommentSchema'))
 
     class Meta:
         fields = ('id', 'username', 'email', 'password', 'is_admin', 'date', 'releases', 'reviews', 'comments')

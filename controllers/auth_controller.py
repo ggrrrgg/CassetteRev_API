@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from init import db, bcrypt
 from models.user import User, user_schema, users_schema
 from models.release import Release, release_schema, releases_schema
@@ -9,6 +9,12 @@ from psycopg2 import errorcodes
 from datetime import date
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+@auth_bp.route('/users', methods=['GET'])
+def get_all_users():
+    stmt = db.select(User)
+    users = db.session.scalars(stmt)
+    return users_schema.dump(users)
 
 @auth_bp.route('/signup', methods=['POST'])
 def auth_signup():
