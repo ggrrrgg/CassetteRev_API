@@ -104,26 +104,3 @@ def update_user(id):
         return user_schema.dump(user)
     else:
         return {'error': f'User {id} not found'}, 404
-
-
-
-# @auth_bp.route('/release', methods=['POST'])
-# @jwt_required()
-# def create_release():
-#     body_data = release_schema.load(request.get_json())
-#     # create a new Card model instance
-#     release = Release(
-#         artist=body_data.get('artist'),
-#         title=body_data.get('title'),
-#         genre=body_data.get('genre'),
-#         date_released=body_data.get('date_released'),
-#         user_id=get_jwt_identity()
-        
-#     )
-#     # Add that card to the session
-#     db.session.add(release)
-#     # Commit
-#     db.session.commit()
-#     # Respond to the client
-#     return release_schema.dump(release), 201
-    

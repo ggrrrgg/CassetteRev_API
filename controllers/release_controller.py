@@ -26,7 +26,11 @@ def current_user_is_admin():
 @jwt_required()
 def create_release():
     body_data = release_schema.load(request.get_json())
-    # create a new Card model instance
+    # Check if the release already exists by artist and title
+    existing_release = Release.query.filter_by(artist=body_data.get('artist'), title=body_data.get('title')).first()
+    if existing_release:
+        return jsonify({'message': 'Release already exists, would you like to write a review?'}), 409
+    # create a new Release
     release = Release(
         artist=body_data.get('artist'),
         title=body_data.get('title'),
