@@ -10,11 +10,14 @@ from datetime import date
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@auth_bp.route('/users', methods=['GET'])
-def get_all_users():
-    stmt = db.select(User)
-    users = db.session.scalars(stmt)
-    return users_schema.dump(users)
+@auth_bp.route('/profile/<int:id>', methods=['GET'])
+def get_one_user(id):
+    stmt = db.select(User).filter_by(id=id)
+    user = db.session.scalar(stmt)
+    if user:
+        return user_schema.dump(user)
+    else:
+        return {'error': f'User with id {id} not found'}, 404
 
 @auth_bp.route('/signup', methods=['POST'])
 def auth_signup():
