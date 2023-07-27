@@ -3,12 +3,10 @@ from init import db
 from models.user import User, user_schema
 from models.review import review_schema
 from models.comment import comment_schema
-from models.release import Release, release_schema, releases_schema
+from models.release import Release, release_schema
 from controllers.review_controller import review_bp
 from controllers.comment_controller import comment_bp
-from datetime import date
 from flask_jwt_extended import get_jwt_identity, jwt_required
-import functools
 
 releases_bp = Blueprint('releases', __name__, url_prefix='/releases')
 releases_bp.register_blueprint(review_bp, url_prefix='/<int:release_id>/review')
@@ -24,6 +22,24 @@ def current_user_is_admin():
     return False
             
         
+@releases_bp.route('/new', methods=['POST'])
+@jwt_required()
+def create_release():
+    body_data = release_schema.load(request.get_json())
+    # create a new Card model instance
+    release = Release(
+        artist=body_data.get('artist'),
+        title=body_data.get('title'),
+        genre=body_data.get('genre'),
+        date_released=body_data.get('date_released'),
+        user_id=get_jwt_identity()
+        )
+    # Add that card to the session
+    db.session.add(release)
+    # Commit
+    db.session.commit()
+    # Respond to the client
+    return release_schema.dump(release), 201
 
 
 @releases_bp.route('/', methods=['GET'])
