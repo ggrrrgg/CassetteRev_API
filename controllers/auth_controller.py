@@ -6,7 +6,7 @@ from models.review import Review, review_schema, reviews_schema
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy.exc import IntegrityError
 from psycopg2 import errorcodes
-from datetime import date
+from datetime import date, timedelta
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -51,7 +51,8 @@ def auth_login():
     user = db.session.scalar(stmt)
     # If user exists and password is correct
     if user and bcrypt.check_password_hash(user.password, body_data.get('password')):
-        token = create_access_token(identity=str(user.id))
+        expires_delta = timedelta(hours=24)
+        token = create_access_token(identity=str(user.id), expires_delta=expires_delta)
         return { 'id': user.id, 'email': user.email, 'token': token, 'is_admin': user.is_admin }
     else:
         return { 'error': 'Invalid email or password' }, 401
