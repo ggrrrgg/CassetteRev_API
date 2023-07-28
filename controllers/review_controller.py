@@ -43,6 +43,13 @@ def create_review(release_id):
     body_data = request.get_json()
     stmt = db.select(Release).filter_by(id=release_id) # select * from cards where id=card_id
     release = db.session.scalar(stmt)
+
+    # Get the rating value from the JSON data
+    rating = int(body_data.get('rating'))
+
+    # Validate the rating value to be between 0 and 10
+    if not 0 <= rating <= 10:
+        return {'error': 'Invalid rating value. Rating must be a number between 0 and 10'}, 400
     if release:
         review = Review(
             rating=body_data.get('rating'),
