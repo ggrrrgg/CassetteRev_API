@@ -9,6 +9,14 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 review_bp = Blueprint('review', __name__)
 
+def current_user_is_admin():
+    # Assuming you have implemented the 'User' model, and you have access to the current user object.
+    # If not, you need to retrieve the current user from your authentication system.
+    current_user = User.query.get(get_jwt_identity())
+    if current_user and current_user.is_admin:
+        return True
+    return False
+
 @review_bp.route('/<int:review_id>', methods=['GET'])
 def get_one_review(release_id, review_id):
 
@@ -55,12 +63,18 @@ def delete_one_review(release_id, review_id):
     
     stmt = db.select(Review).filter_by(id=review_id)
     review = db.session.scalar(stmt)
+
+    if current_user_is_admin():
+        # Admins are granted permission to delete any release
+        db.session.delete(review)
+        db.session.commit()
+        return {'message': f'Comment {release_id, review_id} deleted successfully'}
     if review:
         db.session.delete(review)
         db.session.commit()
         return {'message': f'Review {release_id, review_id} deleted successfully'}
     else:
-        return {'error': f'Review not found'}, 404
+        return {'error':'Review not found'}, 404
 
 @review_bp.route('/<int:review_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
