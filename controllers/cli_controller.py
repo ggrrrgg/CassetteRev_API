@@ -4,7 +4,6 @@ from models.user import User
 from models.release import Release
 from models.review import Review
 from models.comment import Comment
-from datetime import date
 
 db_commands = Blueprint('db', __name__)
 
@@ -29,7 +28,7 @@ def seed_db():
         ),
         User(
             username='Dummy1',
-            email='user1@email.com',
+            email='dumdum1@email.com',
             password=bcrypt.generate_password_hash('user1pw').decode('utf-8')
         )
     ]
@@ -58,14 +57,14 @@ def seed_db():
     reviews = [
         Review(
             rating='9',
-            review_txt='Wow',
+            review_txt='Next level chef, lets go baby!',
             user=users[1],
             releases=releases[0]
 
         ),
         Review(
             rating='7',
-            review_txt='Yeah, I reckon',
+            review_txt='NGL, its nice',
             user=users[0],
             releases=releases[1]
         )
@@ -75,21 +74,17 @@ def seed_db():
 
     comments = [
         Comment(
-            comment_txt="U old",
+            comment_txt="Right???",
             user=users[1],
-            reviews=reviews[1]
+            reviews=reviews[0]
         ),
         Comment(
-            comment_txt="Cringgggeeee",
+            comment_txt="Wowee",
             user=users[1],
             reviews=reviews[1]
         )
     ]
 
-    
-    
     db.session.add_all(comments)
     db.session.commit()
-
-
     print("Tables seeded")

@@ -14,6 +14,7 @@ class Comment(db.Model):
     user = db.relationship('User', back_populates='comments')
     reviews = db.relationship('Review', back_populates='comments')
 
+
 class CommentSchema(ma.Schema):
     user = fields.Nested('UserSchema', only=['user_id', 'email'])
     review = fields.Nested('ReviewSchema', exclude=['comments'])

@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 from init import db, bcrypt
-from models.user import User, user_schema, users_schema
-from models.release import Release, release_schema, releases_schema
-from models.review import Review, review_schema, reviews_schema
+from models.user import User, user_schema
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy.exc import IntegrityError
 from psycopg2 import errorcodes
@@ -23,8 +21,7 @@ def get_one_user(id):
 def auth_signup():
     try:
         body_data = request.get_json()
-
-        # Create a new User model instance from the user info
+        # Create a new User model instance
         user = User()
         user.username = body_data.get('username')
         user.email = body_data.get('email')
@@ -58,8 +55,7 @@ def auth_login():
         return { 'error': 'Invalid email or password' }, 401
     
 def current_user_is_admin():
-    # Assuming you have implemented the 'User' model, and you have access to the current user object.
-    # If not, you need to retrieve the current user from your authentication system.
+    
     current_user = User.query.get(get_jwt_identity())
     if current_user and current_user.is_admin:
         return True
@@ -73,19 +69,18 @@ def delete_user(id):
     user = db.session.query(User).get(id)
 
     if current_user_is_admin():
-        # Admins are granted permission to delete any release
         db.session.delete(user)
         db.session.commit()
         return {'message': f'{user.username} deleted successfully'}
 
-    # If the user is not an admin, check if they are the owner of the release
     if str(user.id) != get_jwt_identity():
         return {'error': 'You are not authorised to delete this user'}, 403
     else:
         db.session.delete(user)
         db.session.commit()
         return {'message': f'{user.username} deleted successfully'}
-    
+
+
 @auth_bp.route('/editprofile/<int:id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 def update_user(id):
@@ -93,7 +88,7 @@ def update_user(id):
     stmt = db.select(User).filter_by(id=id)
     user = db.session.scalar(stmt)
     if current_user_is_admin():
-        # Admins are granted permission to delete any release
+        
         user.username = body_data.get('username') or user.username
         user.password = body_data.get('password') or user.password
         user.is_admin = body_data.get('is_admin') or user.is_admin

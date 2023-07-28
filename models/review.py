@@ -16,6 +16,7 @@ class Review(db.Model):
     releases = db.relationship('Release', back_populates='reviews')
     comments = db.relationship('Comment', back_populates='reviews', cascade='all, delete')
 
+
 class ReviewSchema(ma.Schema):
     user = fields.Nested('UserSchema', only=['user_id', 'email'])
     releases = fields.Nested('ReleaseSchema', exclude=['reviews'])
