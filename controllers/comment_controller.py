@@ -1,11 +1,20 @@
 from flask import Blueprint, request
 from init import db
+from models.user import User
 from models.release import Release
 from models.review import Review
 from models.comment import Comment, comment_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 comment_bp = Blueprint('comment', __name__)
+
+def current_user_is_admin():
+    # Assuming you have implemented the 'User' model, and you have access to the current user object.
+    # If not, you need to retrieve the current user from your authentication system.
+    current_user = User.query.get(get_jwt_identity())
+    if current_user and current_user.is_admin:
+        return True
+    return False
 
 
 @comment_bp.route('/<int:comment_id>', methods=['GET'])
@@ -42,6 +51,12 @@ def create_comment(release_id, review_id):
 def delete_comment(release_id, review_id, comment_id):
     stmt = db.select(Comment).filter_by(id=comment_id)
     comment = db.session.scalar(stmt)
+
+    if current_user_is_admin():
+        # Admins are granted permission to delete any release
+        db.session.delete(comment)
+        db.session.commit()
+        return {'message': f'Comment {release_id, review_id, comment_id} deleted successfully'}
     if comment:
         db.session.delete(comment)
         db.session.commit()
