@@ -1,12 +1,33 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from init import db
 from models.user import User
-from models.release import Release, release_schema, releases_schema
-from models.review import Review, review_schema, reviews_schema
+from models.release import Release
+from models.review import Review, review_schema
+from models.comment import comment_schema
 from datetime import date
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 review_bp = Blueprint('review', __name__)
+
+@review_bp.route('/<int:review_id>', methods=['GET'])
+def get_one_review(release_id, review_id):
+
+    stmt = db.select(Review).filter_by(id=review_id)
+    review = db.session.scalar(stmt)
+
+    if review:
+        review_info = review_schema.dump(review)
+
+        # Include reviews for the release
+        review_info['comment'] = []
+        for comment in review.comments:
+            comment_info = comment_schema.dump(comment)
+
+            review_info['comment'].append(comment_info)
+
+        return jsonify(review_info)
+    else:
+        return {'error': f'Review with id {release_id, review_id} not found'}, 404
 
 @review_bp.route('/', methods=['POST'])
 @jwt_required()

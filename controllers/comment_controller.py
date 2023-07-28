@@ -7,6 +7,15 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 comment_bp = Blueprint('comment', __name__)
 
+
+@comment_bp.route('/<int:comment_id>', methods=['GET'])
+def get_one_comment(release_id, review_id, comment_id):
+    stmt = db.select(Comment).filter_by(id=comment_id)
+    comment = db.session.scalar(stmt)
+    if comment:
+        return comment_schema.dump(comment)
+    else:
+        return {'error': f'Comment with id {release_id, review_id, comment_id} not found'}, 404
 # /cards/card_id/comments - POST
 
 @comment_bp.route('/', methods=['POST'])
