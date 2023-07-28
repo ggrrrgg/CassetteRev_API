@@ -17,11 +17,11 @@ class Review(db.Model):
     comments = db.relationship('Comment', back_populates='reviews', cascade='all, delete')
 
 class ReviewSchema(ma.Schema):
-    user = fields.Nested('UserSchema', only=['username', 'email'])
+    user = fields.Nested('UserSchema', only=['user_id', 'email'])
     releases = fields.Nested('ReleaseSchema', exclude=['reviews'])
 
     class Meta:
-        fields = ('id', 'rating', 'review_txt', 'release', 'username')
+        fields = ('id', 'rating', 'review_txt', 'release_id', 'user_id')
         ordered = True
 
 review_schema = ReviewSchema()

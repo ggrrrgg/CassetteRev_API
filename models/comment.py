@@ -15,11 +15,11 @@ class Comment(db.Model):
     reviews = db.relationship('Review', back_populates='comments')
 
 class CommentSchema(ma.Schema):
-    user = fields.Nested('UserSchema', only=['username', 'email'])
+    user = fields.Nested('UserSchema', only=['user_id', 'email'])
     review = fields.Nested('ReviewSchema', exclude=['comments'])
 
     class Meta:
-        fields = ('id', 'comment_txt', 'release', 'username')
+        fields = ('id', 'comment_txt', 'release_id', 'user_id')
         ordered = True
 
 comment_schema = CommentSchema()

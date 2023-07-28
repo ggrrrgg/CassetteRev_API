@@ -1,15 +1,14 @@
 from init import db, ma
-from marshmallow import fields, validates
-from marshmallow.validate import Length, And, Regexp, OneOf
-from marshmallow.exceptions import ValidationError
+from marshmallow import fields
+
 
 
 class Release(db.Model):
     __tablename__ = 'releases'
 
     id = db.Column(db.Integer, primary_key=True)
-    artist = db.Column(db.String)
-    title = db.Column(db.Text)
+    artist = db.Column(db.String, nullable=False)
+    title = db.Column(db.String, nullable=False)
     date_released = db.Column(db.Date)
     genre = db.Column(db.String)
 
@@ -20,11 +19,11 @@ class Release(db.Model):
 
 
 class ReleaseSchema(ma.Schema):
-    user = fields.Nested('ReleaseSchema', only=['username', 'email'])
-    reviews = fields.Nested('ReviewSchema', only=['username', 'rating', 'review_txt'] )
+    user = fields.Nested('ReleaseSchema', only=['user_id', 'email'])
+    reviews = fields.Nested('ReviewSchema', only=['user_id', 'rating', 'review_txt'] )
 
     class Meta:
-        fields = ('id', 'artist', 'title', 'date_released', 'genre', 'reviews')
+        fields = ('id', 'artist', 'title', 'date_released', 'genre', 'reviews', 'user_id')
         ordered = True
 
 release_schema = ReleaseSchema()
