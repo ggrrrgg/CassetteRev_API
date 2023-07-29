@@ -73,18 +73,18 @@ def auth_login():
     else:
         return { 'error': 'Invalid email or password' }, 401
 
-
+# delete route to remove user
 @auth_bp.route('/delete/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(id):
-    
+    # get id 
     user = db.session.query(User).get(id)
-
+    # check if user is admin, allow delete if so
     if current_user_is_admin():
         db.session.delete(user)
         db.session.commit()
         return {'message': f'{user.username} deleted successfully'}
-
+    # if user id matches jwt allow delete, return error if not
     if str(user.id) != get_jwt_identity():
         return {'error': 'You are not authorised to delete this user'}, 403
     else:
@@ -92,28 +92,37 @@ def delete_user(id):
         db.session.commit()
         return {'message': f'{user.username} deleted successfully'}
 
-
+# auth edit user profile route
 @auth_bp.route('/editprofile/<int:id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 def update_user(id):
+    # get json data from client
     body_data = user_schema.load(request.get_json(), partial=True)
+    # find user by id in db
     stmt = db.select(User).filter_by(id=id)
     user = db.session.scalar(stmt)
+    # check if user is admin
     if current_user_is_admin():
-        
+        # if user is admin allow changes, if unchanged fields, allow to be unchanged
         user.username = body_data.get('username') or user.username
         user.password = bcrypt.generate_password_hash(body_data.get('password')).decode('utf-8') or user.password
+        # admin can make other users admin
         user.is_admin = body_data.get('is_admin') or user.is_admin
-        
+        # commit changes
         db.session.commit()
+        # return to client
         return user_schema.dump(user) and {'message': f'{user.username} updated successfully'}
+    # if user id matches
     if user:
+        # if user id matches login token allow, error if not
         if str(user.user_id) != get_jwt_identity():
             return {'error': f'Only {user.username} can edit themselves'}, 403
+        # allow username and password to be edited by user
         user.username = body_data.get('username') or user.username
         user.password = bcrypt.generate_password_hash(body_data.get('password')).decode('utf-8')or user.password
-        
+        # commit changes
         db.session.commit()
         return user_schema.dump(user) and {'message': f'{user.username} updated successfully'}
+    # return not found error if id not matched
     else:
         return {'error': f'User {id} not found'}, 404
