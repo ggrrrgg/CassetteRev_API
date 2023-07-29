@@ -1,18 +1,13 @@
 from flask import Blueprint, request
 from init import db
 from models.user import User
+from functions import current_user_is_admin
 from models.release import Release
 from models.review import Review
 from models.comment import Comment, comment_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 comment_bp = Blueprint('comment', __name__)
-
-def current_user_is_admin():
-    current_user = User.query.get(get_jwt_identity())
-    if current_user and current_user.is_admin:
-        return True
-    return False
 
 
 @comment_bp.route('/<int:comment_id>', methods=['GET'])

@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from init import db
+from functions import current_user_is_admin
 from models.user import User, user_schema
 from models.review import review_schema
 from models.comment import comment_schema
@@ -11,13 +12,6 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 releases_bp = Blueprint('releases', __name__, url_prefix='/releases')
 releases_bp.register_blueprint(review_bp, url_prefix='/<int:release_id>/review')
 releases_bp.register_blueprint(comment_bp, url_prefix='/<int:release_id>/<int:review_id>/comment')
-
-
-def current_user_is_admin():
-    current_user = User.query.get(get_jwt_identity())
-    if current_user and current_user.is_admin:
-        return True
-    return False
             
         
 @releases_bp.route('/new', methods=['POST'])

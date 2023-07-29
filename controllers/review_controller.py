@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from init import db
+from functions import current_user_is_admin
 from models.user import User
 from models.release import Release
 from models.review import Review, review_schema
@@ -9,11 +10,6 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 review_bp = Blueprint('review', __name__)
 
-def current_user_is_admin():
-    current_user = User.query.get(get_jwt_identity())
-    if current_user and current_user.is_admin:
-        return True
-    return False
 
 @review_bp.route('/<int:review_id>', methods=['GET'])
 def get_one_review(release_id, review_id):

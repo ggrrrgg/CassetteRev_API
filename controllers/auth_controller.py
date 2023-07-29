@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from init import db, bcrypt
 from models.user import User, user_schema
+from functions import current_user_is_admin
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy.exc import IntegrityError
 from psycopg2 import errorcodes
@@ -72,15 +73,6 @@ def auth_login():
     else:
         return { 'error': 'Invalid email or password' }, 401
 
-# function to check if current user is admin
-def current_user_is_admin():
-    # get token from current session user
-    current_user = User.query.get(get_jwt_identity())
-    # check if is_admin=True
-    if current_user and current_user.is_admin:
-        return True
-    return False
-
 
 @auth_bp.route('/delete/<int:id>', methods=['DELETE'])
 @jwt_required()
@@ -110,7 +102,7 @@ def update_user(id):
     if current_user_is_admin():
         
         user.username = body_data.get('username') or user.username
-        user.password = body_data.get('password') or user.password
+        user.password = bcrypt.generate_password_hash(body_data.get('password')).decode('utf-8') or user.password
         user.is_admin = body_data.get('is_admin') or user.is_admin
         
         db.session.commit()
@@ -119,7 +111,7 @@ def update_user(id):
         if str(user.user_id) != get_jwt_identity():
             return {'error': f'Only {user.username} can edit themselves'}, 403
         user.username = body_data.get('username') or user.username
-        user.password = body_data.get('password') or user.password
+        user.password = bcrypt.generate_password_hash(body_data.get('password')).decode('utf-8')or user.password
         
         db.session.commit()
         return user_schema.dump(user) and {'message': f'{user.username} updated successfully'}
