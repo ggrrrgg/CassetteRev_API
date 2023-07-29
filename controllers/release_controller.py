@@ -122,26 +122,29 @@ def update_one_release(id):
     release = db.session.scalar(stmt)
     # set jwt id as current user variable
     current_user_id = get_jwt_identity()
-    # if release user id matches jwt id allow edit, return error if not
-     # admin can also edit any release, so check if user is admin and allow edit if so 
-    if str(release.user_id) != current_user_id:
-        return {'error': 'You are not authorised to edit this review'}, 403
-   
+    # admin can also edit any release, so check if user is admin and allow edit if so 
     if current_user_is_admin():
-        pass
-    else:
-        return {'message': 'You are not authorised to edit this review'}
-    
-    # if matches id allow edit
-    if release:
-        
+        # replace any given fields from client, leave as is if not given
         release.artist = body_data.get('artist') or release.artist
         release.title = body_data.get('title') or release.title
         release.date_released = body_data.get('date_released') or release.date_released
         release.genre = body_data.get('genre') or release.genre
-        
+        # commit and return to client
         db.session.commit()
         return release_schema.dump(release)
+    # if release user id matches jwt id allow edit, return error if not
+    if str(release.user_id) != current_user_id:
+        return {'error': 'You are not authorised to edit this review'}, 403
+    # if matches id allow edit
+    if release:
+        # as above
+        release.artist = body_data.get('artist') or release.artist
+        release.title = body_data.get('title') or release.title
+        release.date_released = body_data.get('date_released') or release.date_released
+        release.genre = body_data.get('genre') or release.genre
+        db.session.commit()
+        return release_schema.dump(release)
+    # if no release id match return not found error
     else:
         return {'error': f'Release not found with id {id}'}, 404
     
