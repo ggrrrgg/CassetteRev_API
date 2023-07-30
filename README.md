@@ -343,7 +343,7 @@ if OK allows editing of comment text
 ---
 <h3>R6 ERD</h3>
 
-![Images](../apierd3.jpg)
+![Images](./apierd3.jpg)
 ---
 <h3>R7 3rd Parties </h3>
 
