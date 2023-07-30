@@ -455,3 +455,43 @@ comment model relationships all stated above
 
 ### R9 DB Relations
 
+User table holds all user profile data and its primary key is held in all other tables as a foreign key to declare ownership over user releases, reviews, and comments.
+It has the following data columns:
+
+- user_id - integer, Primary Key
+- username - string, not nullable
+- email - string, not nullable and must be unique
+- password - string, bcrypt hashed 
+- date - date, auto generated on day of user creation
+- is_admin - boolean
+
+The Releases table holds all information pertaining to each release added to the database. It relates to the user table and the review table, as described in R8. It holds the following:
+
+- release id, integer, primary key
+- artist, string, not nullable, artist name 
+- title, string, not nullable, title of the album, ep, or single release 
+- date releases, date of the releases release.
+- genre, string, music genre of the release
+
+The Review table holds all information pertaining to reviews of releases. It relates to all other tables in the db. a user may own many reviews, a release may own many reviews, and review may own many comments.
+It contains the following:
+
+- review id, integer, primary key
+- rating, integer, /10
+- review text - text
+
+The Comment table holds information pertaining to comments on reviews of releases. It relates to the user table and reviews table. A user may own many comments, and a review may have many comments. It contains the following:
+
+- comment id, integer, primary key
+- comment txt - text
+
+### R10 Task Tracking
+
+I relied on the trello board linked above to keep track of progress on the app. I broke down each stage of the assignment into cards with checkmarks to mark off as I went. This helped keep the finish line in sight and manage my time as best as possible. 
+
+Once I started building controllers I was able to test routes as I went and troubleshoot, each card had a test checkmark to pass. And I added an issues card for problems that I could return to later so as not to lose track of any problems or get held up on something small but time consuming to research a fix for.
+
+Note there is a 'nice to haves card' that I didnt get around to, so remains in the to do column. Hopefully I'll return to this idea at some point in the future where I can address those.
+
+
+
