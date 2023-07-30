@@ -63,13 +63,13 @@ Finally run the app
 ---
 <h3>R1 Problem</h3>
 
-There are, out there people who still love to buy and listen to music on cassette. It has its appeals, like vinyl, owning a physical, tangible copy of an album that you love that has great artwork and liner notes to explore as you listen is a much more immersive experience than listening to streaming services. Cassettes are loved for their nostalgic quality (to certain generations) and the sonic imprint the medium imparts is comfortable to listen to, and compliments many styles of music (lofi electronic music and ambient music are strong modern genres).
+There are, out there people who still love to buy and listen to music on cassette. It has its appeals, like vinyl (but much cheaper), owning a physical, tangible copy of an album that you love that has great artwork and liner notes to explore as you listen is a much more immersive experience than listening to streaming services. Cassettes are loved for their nostalgic quality (to certain generations) and the sonic imprint the medium imparts is comfortable to listen to, and compliments many styles of music (lofi electronic music and ambient music are strong modern genres).
 
 There are not many places online that cater to this community and what is available is scattered between reddit threads and personal bloggers. A more central app that is able to keep up to date with new releases and provide a space for enthusiasts to share their own discoveries could be a great resource for that community.
 
 <h3>R2 Why</h3>
 
-The hope would be that in providing a space for the cassette loving community to come together the community grows, pulling in people new to the format. Encouraging a more relaxed and linearly focused way to enjoy music is a small dose, but a healthy antidote to the scattered attention lifestyle of the current smartphone / internet age.
+The hope would be that in providing a space for the cassette loving community to come together the community grows, pulling in people new to the format. Having an easy way to have peers recommend music that is outside the streaming service algos leads to more interesting, unique and independently made discoveries. Encouraging a more relaxed and linearly focused way to enjoy music is a small dose, but a healthy antidote to the scattered attention lifestyle of the current smartphone / internet age.
 
 This version of the app is intended as a simple framework of what it could become, admin users are able to add releases to keep users up to date with the latest. Users are then able to discuss those releases by leaving reviews and commenting on eachothers reviews. Users can also add their own discovered releases. More detail can be added around the specifics of the cassette pressing, tape type quality, and reissue details etc in their review if they wish. I'd like to integrate a bandcamp API to provide artwork and streaming and a link to purchase, but I ran out of time unfortunately.
 
@@ -108,11 +108,11 @@ PostgreSQL offers numerous advantages and disadvantages but remains a highly fun
 
 <h3> ORM </h3>
 
-An ORM (Object-Relational Mapping) is a programming technique that allows developers to interact with a relational database using an object-oriented programming language. It essentially bridges the gap between the object-oriented world of programming languages and the relational world of databases. 
+The ORM (Object-Relational Mapping) allows us to interact with a relational database using an object-oriented programming language. It essentially bridges the gap between the object-oriented world of programming languages and the relational world of databases. 
 
 In this case the ORM used is SQLAlchemy, bridging the gap between Python and PostgreSQL.
 
-ORMs provide a higher-level abstraction over database operations. Instead of writing raw SQL queries, developers can work with objects and classes that directly represent database tables and relationships. 
+ORMs provide a higher-level abstraction over database operations. Instead of writing raw SQL queries, we can work with objects and classes that directly represent database tables and relationships. 
 For example in this app, database tables are represented as Python classes:
 
 ```
@@ -150,23 +150,199 @@ SQLAlchemy also simplifies the Create, Read, Update, and Delete (CRUD) operation
 
 Additionally we can compose queries using high-level language constructs rather than dealing with SQL directly, making query construction more readable and maintainable.
 
-
-Relationship Management:
-Managing relationships between database tables can be complex. ORM frameworks handle these relationships transparently, allowing developers to easily define and work with relationships like one-to-one, one-to-many, and many-to-many. This simplifies working with complex data models.
-
-Data Validation and Type Safety:
-ORMs often include built-in data validation mechanisms. This helps enforce data integrity and ensures that the data stored in the database is consistent and valid. Additionally, ORMs provide type safety by mapping database columns to specific data types in the programming language.
-
-Performance Optimization:
-While ORMs abstract away the complexity of database operations, some ORMs also offer performance optimization features, such as lazy loading and query optimization. These features help in reducing unnecessary database calls and optimizing the performance of database operations.
-
-Code Reusability:
-ORMs allow developers to define data models and interact with data in a consistent manner across the application. This promotes code reusability as the same data models and operations can be utilized in different parts of the application.
-
-Rapid Application Development (RAD):
-Using an ORM can significantly speed up the development process. Developers can focus more on application logic and less on writing database-specific code. This results in faster development cycles and quicker time-to-market for applications.
+SQLAlchemy alo handles table relationships, and has built in validation mechanisms that makes sure the the databse integrity is kept to a maximum.
 
 
+<h3> R5 Endpoints </h3>
 
+<b>auth/profile/id (GET)</b>
+```
+Endpoint to view a users profile, no login or permissions required.
 
+If user invalid user id given, client is returned a not found error message
+```
+
+<b>auth/signup (POST)</b>
+```
+Sign up route for new users.
+
+Integrity errors in place to ensure unique email for each user profile and no required fields are left null.
+```
+<b>auth/login (POST)</b>
+
+```
+login route requires email and password to match db, if ok issues jwt with 24 hour expiry.
+
+if email and pw do not match, returns error message to client.
+```
+
+<b>auth/editprofile/id(PUT, PATCH)</b>
+```
+requires user to be logged in or be an admin.
+
+admins can edit user name or password (incase a reset is needed), andalso make any other user an admin.
+
+user can edit username or password.
+
+if successful message returned confirming.
+
+not found error returns if user not found.
+```
+<b>auth/delete/id(DELETE)</b>
+```
+requires user login or to be admin.
+
+if so returns username deleted success message 201.
+
+if invalid user logged in, not authorised 403 returned.
+```
+<b>RELEASE ROUTES</b>
+
+<b>releases/new (POST)</b>
+```
+requires user or admin login.
+
+checks if release has already been created by another user by checking against artist and title. returns error message if so.
+
+201 returns release info to client.
+```
+<b>releases(GET)</b>
+```
+displays all releases and associated reviews and comments
+
+no login required
+```
+<b>releases/id(GET)</b>
+```
+displays a single release and it associated reviews and comments.
+
+no login required.
+
+returns not found message for invalid release id.
+```
+<b>releases/id(DELETE)</b>
+```
+requires admin login. no user can delete a release.
+
+returns 201 release title deleted message
+or not authorised if not admin, 403
+```
+<b>releases/id(PUT PATCH)</b>
+```
+user or admin can edit release artist, title, release date, or genre.
+
+201 returns updated release info
+
+403 returns if no jwt or not owner of release 
+
+404 returns if release id is not found
+```
+<b>REVIEWS</b>
+
+releases/id/reviews/id(GET)
+```
+returns a single review and any associated comments for a given release.
+
+returns a not found error if release, review id do not match db.
+```
+*note no endpoint to view all reviews necessary as all reviews are displayed when using the GET release route above*
+
+<b>releases/id/reviews(POST)</b>
+```
+requires login
+
+matches given release id.
+
+checks if rating given for release is between 0 and 10, returns 400 error message if not.
+
+201 returns review info to client
+
+404 not found error returned if release id not found.
+```
+<b>releases/id/reviews/id(DELETE)</b>
+```
+requires user or admin login
+
+returns 403 unauthorised error message if neither
+
+returns 201 succesfully deleted if OK
+
+or returns 404 not found error if release, review id is not matched
+```
+<b>releases/id/reviews/id</b>
+```
+requires user or admin login
+
+matches review id
+
+checks if current user is owner of review, returns 403 if not
+
+checks if current user is admin, returns 403 i not
+
+if rating is being edited, checks for valid value 0- 10, returns 409 error if not
+
+if all OK allows edit and returns review info 201
+
+or returns 404 not found if releasse, review id do not match
+```
+<b>COMMENTS</b>
+
+<b>releases/id/id/comment/id(GET)</b>
+```
+view a single comment.
+
+no login required.
+
+matches comment by release, review, and comment id
+
+if match returns 201 with comment info
+
+if no match 404 not found error
+```
+*note no endpoint to view all comments necessary as all comments for a review are displayed when using the GET review route above*
+
+<b>releases/id/id/comment(POST)</b>
+```
+user login required
+
+matches release and review id
+
+201 returns successful comment data
+
+404 not found if mismatched release review id
+```
+<b>releases/id/id/comment/id(DELETE)</b>
+```
+requires user or admin login
+
+matches comment from release, review, comment id
+
+checks current user is comment owner
+
+checks if current user is admin, returns 403 not authorised error if neither
+
+if OK returns 201 successfully deleted message
+
+if not found, 404 error
+```
+<b>releases/id/id/comment/id(PUT PATCH)</b>
+```
+requires user login, admin cannot edit comments
+
+matches comment id
+
+checks current jwt user is comment owner, returns 403 if not
+
+if OK allows editing of comment text
+
+201 returns edited comment info
+
+404 not found if ids do not match.
+```
+
+<h3>R6 ERD</h3>
+
+![Images](../apierd2.jpg)
+
+<h3>R7 3rd Parties </h3>
 

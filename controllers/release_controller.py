@@ -105,7 +105,7 @@ def delete_one_release(id):
     if current_user_is_admin():
         db.session.delete(release)
         db.session.commit()
-        return {'message': f'{release.title} deleted successfully'}
+        return {'message': f'{release.title} deleted successfully'}, 201
     else:
         return {'error': 'You are not authorised to delete this release'}, 403
 
