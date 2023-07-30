@@ -67,6 +67,7 @@ There are, out there people who still love to buy and listen to music on cassett
 
 There are not many places online that cater to this community and what is available is scattered between reddit threads and personal bloggers. A more central app that is able to keep up to date with new releases and provide a space for enthusiasts to share their own discoveries could be a great resource for that community.
 
+---
 <h3>R2 Why</h3>
 
 The hope would be that in providing a space for the cassette loving community to come together the community grows, pulling in people new to the format. Having an easy way to have peers recommend music that is outside the streaming service algos leads to more interesting, unique and independently made discoveries. Encouraging a more relaxed and linearly focused way to enjoy music is a small dose, but a healthy antidote to the scattered attention lifestyle of the current smartphone / internet age.
@@ -105,7 +106,7 @@ I have used PostgreSQL for this project, it has these advantages:
 
 PostgreSQL offers numerous advantages and disadvantages but remains a highly functional and widely used database system known for its robustness, reliability, and scalability, making it an excellent choice for this app.
 
-
+---
 <h3> ORM </h3>
 
 The ORM (Object-Relational Mapping) allows us to interact with a relational database using an object-oriented programming language. It essentially bridges the gap between the object-oriented world of programming languages and the relational world of databases. 
@@ -152,7 +153,7 @@ Additionally we can compose queries using high-level language constructs rather 
 
 SQLAlchemy alo handles table relationships, and has built in validation mechanisms that makes sure the the databse integrity is kept to a maximum.
 
-
+---
 <h3> R5 Endpoints </h3>
 
 <b>auth/profile/id (GET)</b>
@@ -339,10 +340,118 @@ if OK allows editing of comment text
 
 404 not found if ids do not match.
 ```
-
+---
 <h3>R6 ERD</h3>
 
-![Images](../apierd2.jpg)
-
+![Images](../apierd3.jpg)
+---
 <h3>R7 3rd Parties </h3>
+
+### Flask
+
+Flask is a lightweight Python web framework known for its simplicity and flexibility. It provides essential components for web development, making it popular among developers for building scalable and maintainable web applications. Flask's modular design and numerous extensions enable easy customization and integration with other tools.
+
+### SQLAlchemy
+
+SQLAlchemy is a powerful and widely used Python ORM (Object-Relational Mapping) library. It provides a convenient way to interact with databases. SQLAlchemy allows developers to work with databases using Python objects, making it easy to build and manage database-driven applications.
+
+### Marshmallow
+
+Marshmallow is a Python library used for object serialization and validation. It allows developers to convert complex data types, such as Python objects, to and from JSON or other formats easily. Marshmallow provides a simple and flexible approach to data validation, ensuring that data adheres to defined schemas.
+
+### psycopg2
+
+Psycopg2 is a widely-used PostgreSQL adapter for Python. It enables Python applications to interact with PostgreSQL databases efficiently and securely. Psycopg2 is known for its performance, stability, and compliance with the Python DB-API specification. It allows developers to execute SQL queries, manage transactions, and handle data retrieval seamlessly.
+
+### bcrypt
+
+Bcrypt is a widely-used password hashing library for Python. It offers a secure way to hash passwords, making them resistant to brute-force attacks. Bcrypt employs a computationally intensive algorithm, which slows down the hashing process and adds a layer of protection against password cracking attempts. 
+
+### JWT
+
+JWT (JSON Web Tokens) is a popular standard for securely transmitting information between parties as JSON objects. It is commonly used for user authentication and authorization in web applications and APIs. JWTs consist of three parts: header, payload, and signature. The header contains metadata about the token, the payload carries the user's claims, and the signature ensures the token's integrity. 
+
+---
+### R8 Model Relationships
+
+<b>User Model</b>
+```
+class User(db.Model):
+    __tablename__ = 'users'
+# users table columns
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False, unique=True)
+    password = db.Column(db.String, nullable=False)
+    date = db.Column(db.Date)
+    is_admin = db.Column(db.Boolean, default=False)
+# define Flask relationships to reflect foreign keys
+    releases = db.relationship('Release', back_populates='user', cascade='all, delete')
+    reviews = db.relationship('Review', back_populates='user', cascade='all, delete')
+    comments = db.relationship('Comment', back_populates='user', cascade='all, delete')
+```
+
+user model has a one to many relationship with all other tables, and is a foreign key in all other tables. it has a cascading delete to releases, reviews and comments, if a user is deleted all their content goes with them.
+
+<b>Release Model</b>
+
+```
+class Release(db.Model):
+    __tablename__ = 'releases'
+# release table columns
+    id = db.Column(db.Integer, primary_key=True)
+    artist = db.Column(db.String, nullable=False)
+    title = db.Column(db.String, nullable=False)
+    date_released = db.Column(db.Date)
+    genre = db.Column(db.String)
+# foreign keys
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+# define Flask relationships to reflect foreign keys
+    user = db.relationship('User', back_populates='releases')
+    reviews = db.relationship('Review', back_populates='releases', cascade='all, delete')
+```
+
+release model, in addition to user relationship, has a one to many relationship with reviews and is a foreign key in the review model. if a release is deleted, reviews are all deleted also.
+
+<b>Review Model</b>
+
+```
+class Review(db.Model):
+    __tablename__ = 'reviews'
+# review table columns
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer)
+    review_txt = db.Column(db.Text)
+# foreign keys
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    release_id = db.Column(db.Integer, db.ForeignKey('releases.id'), nullable=False)
+# define Flask relationships to reflect foreign keys
+    user = db.relationship('User', back_populates='reviews') 
+    releases = db.relationship('Release', back_populates='reviews')
+    comments = db.relationship('Comment', back_populates='reviews', cascade='all, delete')
+```
+
+review model, in addition above, has a one to many relationship with comments and is a foreign key in the comment model. if a review is deleted, comments are all deleted also but release and user remain.
+
+<b>Comment Model</b>
+
+```
+class Comment(db.Model):
+    __tablename__ = 'comments'
+# Comment table columns
+    id = db.Column(db.Integer, primary_key=True)
+    comment_txt = db.Column(db.Text)
+# foreign key columns
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
+# Define Flask relationships to reflect foreign keys
+    user = db.relationship('User', back_populates='comments')
+    reviews = db.relationship('Review', back_populates='comments')
+```
+
+comment model relationships all stated above
+
+---
+
+### R9 DB Relations
 
